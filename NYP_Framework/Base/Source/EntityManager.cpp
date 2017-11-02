@@ -16,6 +16,16 @@ void EntityManager::Update(double _dt)
 		(*it)->Update(_dt);
 	}
 
+	for (it = bulletList.begin(); it != bulletList.end(); ++it)
+	{
+		(*it)->Update(_dt);
+	}
+
+	for (it = npcList.begin(); it != npcList.end(); ++it)
+	{
+		(*it)->Update(_dt);
+	}
+
 	// Check for Collision amongst entities with collider properties
 	CheckForCollision();
 
@@ -35,6 +45,38 @@ void EntityManager::Update(double _dt)
 			++it;
 		}
 	}
+
+	it = bulletList.begin();
+	while (it != bulletList.end())
+	{
+		if ((*it)->IsDone())
+		{
+			// Delete if done
+			delete *it;
+			it = bulletList.erase(it);
+		}
+		else
+		{
+			// Move on otherwise
+			++it;
+		}
+	}
+
+	it = npcList.begin();
+	while (it != npcList.end())
+	{
+		if ((*it)->IsDone())
+		{
+			// Delete if done
+			delete *it;
+			it = npcList.erase(it);
+		}
+		else
+		{
+			// Move on otherwise
+			++it;
+		}
+	}
 }
 
 // Render all entities
@@ -44,6 +86,14 @@ void EntityManager::Render()
 	std::list<EntityBase*>::iterator it, end;
 	end = entityList.end();
 	for (it = entityList.begin(); it != end; ++it)
+	{
+		(*it)->Render();
+	}
+	for (it = bulletList.begin(); it != bulletList.end(); ++it)
+	{
+		(*it)->Render();
+	}
+	for (it = npcList.begin(); it != npcList.end(); ++it)
 	{
 		(*it)->Render();
 	}
@@ -59,12 +109,25 @@ void EntityManager::RenderUI()
 	{
 		(*it)->RenderUI();
 	}
+
 }
 
 // Add an entity to this EntityManager
 void EntityManager::AddEntity(EntityBase* _newEntity)
 {
 	entityList.push_back(_newEntity);
+}
+
+// Add an projectile to this EntityManager
+void EntityManager::AddBullet(EntityBase* _newBullet)
+{
+	bulletList.push_back(_newBullet);
+}
+
+// Add an NPC to this EntityManager
+void EntityManager::AddNPC(EntityBase* _newNPC)
+{
+	npcList.push_back(_newNPC);
 }
 
 // Remove an entity from this EntityManager
@@ -78,7 +141,7 @@ bool EntityManager::RemoveEntity(EntityBase* _existingEntity)
 	{
 		delete *findIter;
 		findIter = entityList.erase(findIter);
-		return true;	
+		return true;
 	}
 	// Return false if not found
 	return false;
@@ -96,7 +159,7 @@ EntityManager::~EntityManager()
 
 // Check for overlap
 bool EntityManager::CheckOverlap(Vector3 thisMinAABB, Vector3 thisMaxAABB, Vector3 thatMinAABB, Vector3 thatMaxAABB)
-{	
+{
 	// Check if this object is overlapping that object
 	/*
 	if (((thatMinAABB.x >= thisMinAABB.x) && (thatMinAABB.x <= thisMaxAABB.x) &&
@@ -181,7 +244,7 @@ bool EntityManager::CheckSphereCollision(EntityBase *ThisEntity, EntityBase *Tha
 	// greater than the distance squared between the 2 reference points of the 2 entities,
 	// then it could mean that they are colliding with each other.
 	if (DistanceSquaredBetween(thisMinAABB, thisMaxAABB) + DistanceSquaredBetween(thatMinAABB, thatMaxAABB) >
-		DistanceSquaredBetween(ThisEntity->GetPosition(), ThatEntity->GetPosition()) * 2.0)
+		DistanceSquaredBetween(ThisEntity->GetPosition(), ThatEntity->GetPosition()))
 	{
 		return true;
 	}
@@ -210,13 +273,43 @@ bool EntityManager::CheckAABBCollision(EntityBase *ThisEntity, EntityBase *ThatE
 	// Do more collision checks with other points on each bounding box
 	Vector3 altThisMinAABB = Vector3(thisMinAABB.x, thisMinAABB.y, thisMaxAABB.z);
 	Vector3 altThisMaxAABB = Vector3(thisMaxAABB.x, thisMaxAABB.y, thisMinAABB.z);
-//	Vector3 altThatMinAABB = Vector3(thatMinAABB.x, thatMinAABB.y, thatMaxAABB.z);
-//	Vector3 altThatMaxAABB = Vector3(thatMaxAABB.x, thatMaxAABB.y, thatMinAABB.z);
+	//Vector3 altThatMinAABB = Vector3(thatMinAABB.x, thatMinAABB.y, thatMaxAABB.z);
+	//Vector3 altThatMaxAABB = Vector3(thatMaxAABB.x, thatMaxAABB.y, thatMinAABB.z);
 
 	// Check for overlap
 	if (CheckOverlap(altThisMinAABB, altThisMaxAABB, thatMinAABB, thatMaxAABB))
 		return true;
 
+	//if (CheckOverlap(altThatMinAABB, altThatMaxAABB, thisMinAABB, thisMaxAABB))
+	//	return true;
+
+	//if (CheckOverlap(altThisMinAABB, altThisMaxAABB, altThatMinAABB, altThatMaxAABB))
+	//	return true;
+
+	Vector3 altThisMinAABB2 = Vector3(thisMinAABB.x, thisMaxAABB.y, thisMinAABB.z);
+	Vector3 altThisMaxAABB2 = Vector3(thisMaxAABB.x, thisMinAABB.y, thisMaxAABB.z);
+	Vector3 altThatMinAABB2 = Vector3(thatMinAABB.x, thatMaxAABB.y, thatMinAABB.z);
+	Vector3 altThatMaxAABB2 = Vector3(thatMaxAABB.x, thatMinAABB.y, thatMaxAABB.z);
+
+	if (CheckOverlap(altThisMinAABB2, altThisMaxAABB2, thatMinAABB, thatMaxAABB))
+		return true;
+
+	if (CheckOverlap(altThisMinAABB2, altThisMaxAABB2, altThatMinAABB2, altThatMaxAABB2))
+		return true;
+
+	Vector3 altThisMinAABB3 = Vector3(thisMinAABB.x, thisMaxAABB.y, thisMaxAABB.z);
+	Vector3 altThisMaxAABB3 = Vector3(thisMaxAABB.x, thisMinAABB.y, thisMinAABB.z);
+	Vector3 altThatMinAABB3 = Vector3(thatMinAABB.x, thatMaxAABB.y, thatMaxAABB.z);
+	Vector3 altThatMaxAABB3 = Vector3(thatMaxAABB.x, thatMinAABB.y, thatMinAABB.z);
+
+	if (CheckOverlap(altThisMinAABB3, altThisMaxAABB3, altThatMinAABB3, altThatMaxAABB3))
+		return true;
+
+	if (CheckOverlap(altThisMinAABB3, altThisMaxAABB3, altThatMinAABB2, altThatMaxAABB2))
+		return true;
+
+	if (CheckOverlap(altThisMinAABB3, altThisMaxAABB3, thatMinAABB, thatMaxAABB))
+		return true;
 	return false;
 }
 
@@ -227,8 +320,8 @@ bool EntityManager::CheckForCollision(void)
 	std::list<EntityBase*>::iterator colliderThis, colliderThisEnd;
 	std::list<EntityBase*>::iterator colliderThat, colliderThatEnd;
 
-	colliderThisEnd = entityList.end();
-	for (colliderThis = entityList.begin(); colliderThis != colliderThisEnd; ++colliderThis)
+	colliderThisEnd = bulletList.end();
+	for (colliderThis = bulletList.begin(); colliderThis != colliderThisEnd; ++colliderThis)
 	{
 		if ((*colliderThis)->HasCollider())
 		{
@@ -239,11 +332,8 @@ bool EntityManager::CheckForCollision(void)
 			// Check for collision with another collider class
 			colliderThatEnd = entityList.end();
 			int counter = 0;
-			for (colliderThat = colliderThis; colliderThat != colliderThatEnd; ++colliderThat)
+			for (colliderThat = entityList.begin(); colliderThat != colliderThatEnd; ++colliderThat)
 			{
-				if (colliderThat == colliderThis)
-					continue;
-
 				if ((*colliderThat)->HasCollider())
 				{
 					// This object was derived from a CCollider class, then it will have Collision Detection methods

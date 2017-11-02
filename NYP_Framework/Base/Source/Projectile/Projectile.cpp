@@ -118,9 +118,9 @@ void CProjectile::Update(double dt)
 	}
 
 	// Update Position
-	position.Set(	position.x + (float)(theDirection.x * dt * m_fSpeed),
-					position.y + (float)(theDirection.y * dt * m_fSpeed),
-					position.z + (float)(theDirection.z * dt * m_fSpeed));
+	position.Set(position.x + (float)(theDirection.x * dt * m_fSpeed),
+		position.y + (float)(theDirection.y * dt * m_fSpeed),
+		position.z + (float)(theDirection.z * dt * m_fSpeed));
 }
 
 
@@ -142,12 +142,12 @@ void CProjectile::Render(void)
 }
 
 // Create a projectile and add it into EntityManager
-CProjectile* Create::Projectile(const std::string& _meshName, 
-								const Vector3& _position, 
-								const Vector3& _direction, 
-								const float m_fLifetime, 
-								const float m_fSpeed,
-								CPlayerInfo* _source)
+CProjectile* Create::Projectile(const std::string& _meshName,
+	const Vector3& _position,
+	const Vector3& _direction,
+	const float m_fLifetime,
+	const float m_fSpeed,
+	CPlayerInfo* _source)
 {
 	Mesh* modelMesh = MeshBuilder::GetInstance()->GetMesh(_meshName);
 	if (modelMesh == nullptr)
@@ -158,7 +158,7 @@ CProjectile* Create::Projectile(const std::string& _meshName,
 	result->SetStatus(true);
 	result->SetCollider(true);
 	result->SetSource(_source);
-	EntityManager::GetInstance()->AddEntity(result);
+	EntityManager::GetInstance()->AddBullet(result);
 
 	return result;
 }

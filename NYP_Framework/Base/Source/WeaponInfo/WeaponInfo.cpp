@@ -5,10 +5,10 @@
 using namespace std;
 
 CWeaponInfo::CWeaponInfo()
-	: magRounds(1)
-	, maxMagRounds(1)
-	, totalRounds(8)
-	, maxTotalRounds(8)
+	: magRounds(10)
+	, maxMagRounds(10)
+	, totalRounds(80)
+	, maxTotalRounds(80)
 	, timeBetweenShots(0.5)
 	, elapsedTime(0.0)
 	, bFire(true)
@@ -146,7 +146,7 @@ void CWeaponInfo::Discharge(Vector3 position, Vector3 target, CPlayerInfo* _sour
 		{
 			// Create a projectile with a cube mesh. Its position and direction is same as the player.
 			// It will last for 3.0 seconds and travel at 500 units per second
-			CProjectile* aProjectile = Create::Projectile("cube", 
+			CProjectile* aProjectile = Create::Projectile("cubeRed", 
 															position, 
 															(target - position).Normalized(), 
 															2.0f, 

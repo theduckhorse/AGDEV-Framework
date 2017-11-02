@@ -16,6 +16,8 @@ public:
 	void RenderUI();
 
 	void AddEntity(EntityBase* _newEntity);
+	void AddBullet(EntityBase* _newBullet);
+	void AddNPC(EntityBase* _newNPC);
 	bool RemoveEntity(EntityBase* _existingEntity);
 
 private:
@@ -31,7 +33,9 @@ private:
 	// Check if any Collider is colliding with another Collider
 	bool CheckForCollision(void);
 
-	std::list<EntityBase*> entityList;
+	std::list<EntityBase*> entityList; //Fixed objects: Buildings and trees
+	std::list<EntityBase*> bulletList; //Projectiles
+	std::list<EntityBase*> npcList; //NPCs
 };
 
 #endif // ENTITY_MANAGER_H
